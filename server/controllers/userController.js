@@ -54,9 +54,26 @@ class UserController {
   }
   static async remove(req, res, next) {
     try {
-      const { email, password } = req.body;
+      const { email } = req.body;
+      if (!email) {
+        throw {
+          message: "Email is required",
+        };
+      }
+      // Check existing user inside database
+      const existingUser = await req.db.collection("users").findOne({ email });
+      if (!existingUser) {
+        throw {
+          message: "User not found",
+        };
+      }
+      await req.db.collection("users").deleteOne({ email });
+      res.status(200).json({
+        message: "User deleted successfully",
+      });
     } catch (error) {
       console.log(error, "UserController - remove");
+      next(error);
     }
   }
   static async test(req, res, next) {
@@ -66,6 +83,7 @@ class UserController {
       });
     } catch (error) {
       console.log(error, "UserController  - test");
+      next(error);
     }
   }
 }
