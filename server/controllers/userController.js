@@ -1,27 +1,22 @@
 const { hashPassword, comparePassword } = require("../helpers/bcrypt");
+const { signToken, verifyToken } = require("../helpers/jwt");
 
 class UserController {
-  static async register(req, res, next) {
+  static async registerUser(req, res, next) {
     try {
       const { email, password } = req.body;
       if (!email) {
-        throw {
-          message: "Email is required",
-        };
+        throw { message: "Email is required" };
       }
       if (!password) {
-        throw {
-          message: "Password is required",
-        };
+        throw { message: "Password is required" };
       }
       // Check existing user inside database
-      const existingUser = await req.db.collection("users").findOne({ email });
-      if (existingUser) {
-        throw {
-          message: "Email already used",
-        };
+      const foundUser = await req.db.collection("users").findOne({ email });
+      if (foundUser) {
+        throw { message: "Email already used" };
       }
-      // Create new user paylaod
+      // Create new user payload
       const newUser = {
         email: email,
         password: hashPassword(password),
@@ -29,30 +24,51 @@ class UserController {
         updatedAt: new Date(),
       };
       await req.db.collection("users").insertOne(newUser);
-      res.status(201).json({
-        message: "User registered successfully",
+      res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+      console.log(error, "UserController - registerUser");
+      next(error);
+    }
+  }
+
+  static async loginUser(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      if (!email) {
+        throw { message: "Email is required" };
+      }
+      if (!password) {
+        throw { message: "Password is required" };
+      }
+      const foundUser = await req.db.collection("users").findOne({ email });
+      if (!foundUser) {
+        throw { message: "Invalid Email/Password" };
+      }
+      const isPasswordValid = comparePassword(password, foundUser.password);
+      if (!isPasswordValid) {
+        throw { message: "Invalid Email/Password" };
+      }
+      const access_token = signToken({
+        _id: foundUser._id,
+        email: foundUser.email,
       });
+      res.status(200).json({ access_token: access_token });
     } catch (error) {
-      console.log(error, "UserController - register");
+      console.log(error, "UserController - loginUser");
       next(error);
     }
   }
-  static async login(req, res, next) {
+
+  static async editUser(req, res, next) {
     try {
       const { email, password } = req.body;
     } catch (error) {
-      console.log(error, "UserController - login");
+      console.log(error, "UserController - editUser");
       next(error);
     }
   }
-  static async modify(req, res, next) {
-    try {
-      const { email, password } = req.body;
-    } catch (error) {
-      console.log(error, "UserController - modify");
-    }
-  }
-  static async remove(req, res, next) {
+
+  static async deleteUser(req, res, next) {
     try {
       const { email } = req.body;
       if (!email) {
@@ -72,10 +88,11 @@ class UserController {
         message: "User deleted successfully",
       });
     } catch (error) {
-      console.log(error, "UserController - remove");
+      console.log(error, "UserController - deleteUser");
       next(error);
     }
   }
+
   static async test(req, res, next) {
     try {
       res.status(200).json({

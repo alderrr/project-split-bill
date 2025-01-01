@@ -3,10 +3,10 @@ const router = require("express").Router();
 // const authentication
 
 router.get("/", UserController.test);
-router.post("/register", UserController.register);
-router.post("/login", UserController.login);
-router.post("/modify", UserController.modify);
-router.post("/remove", UserController.remove);
+router.post("/register", UserController.registerUser);
+router.post("/login", UserController.loginUser);
+router.post("/user/:id/edit", UserController.editUser);
+router.post("/user/:id/delete", UserController.deleteUser);
 
 // router.use(authentication)
 
