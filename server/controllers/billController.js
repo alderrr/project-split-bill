@@ -1,3 +1,5 @@
+const { ObjectId } = require("mongodb");
+
 class BillController {
   static async addBill(req, res, next) {
     try {
@@ -54,7 +56,11 @@ class BillController {
   }
   static async getAllBill(req, res, next) {
     try {
-      const bills = await req.db.collection("bills").find().toArray();
+      const { _id } = req.user;
+      const bills = await req.db
+        .collection("bills")
+        .find({ billOwnerId: _id })
+        .toArray();
       res.status(200).json({ bills: bills });
     } catch (error) {
       next(error);
@@ -62,6 +68,15 @@ class BillController {
   }
   static async getOneBill(req, res, next) {
     try {
+      const billId = req.params.id;
+      const { _id } = req.user;
+      const bill = await req.db
+        .collection("bills")
+        .findOne({ _id: new ObjectId(billId), billOwnerId: _id });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
+      res.status(200).json({ bill });
     } catch (error) {
       next(error);
     }

@@ -36,6 +36,10 @@ const errorHandler = (err, req, res, next) => {
       status = 404;
       message = "User not found";
     }
+    if (err.message === "Bill not found") {
+      status = 404;
+      message = "Bill not found";
+    }
   }
 
   // JsonWebTokenError
