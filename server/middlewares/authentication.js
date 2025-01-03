@@ -4,7 +4,7 @@ const authentication = async (req, res, next) => {
   try {
     let access_token = req.headers.authorization;
     if (!access_token) {
-      throw { message: "Invalid token" };
+      throw new Error("Invalid token");
     }
     access_token = access_token.split(" ")[1];
     const verified = verifyToken(access_token);
@@ -12,7 +12,7 @@ const authentication = async (req, res, next) => {
       .collection("users")
       .findOne({ email: verified.email });
     if (!foundUser) {
-      throw { message: "Invalid token" };
+      throw new Error("Invalid token");
     }
     req.user = {
       _id: foundUser._id,
@@ -20,7 +20,6 @@ const authentication = async (req, res, next) => {
     };
     next();
   } catch (error) {
-    console.log(error, "authentication");
     next(error);
   }
 };

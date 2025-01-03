@@ -6,15 +6,15 @@ class UserController {
     try {
       const { email, password } = req.body;
       if (!email) {
-        throw { message: "Email is required" };
+        throw new Error("Email is required");
       }
       if (!password) {
-        throw { message: "Password is required" };
+        throw new Error("Password is required");
       }
       // Check existing user inside database
       const foundUser = await req.db.collection("users").findOne({ email });
       if (foundUser) {
-        throw { message: "Email already used" };
+        throw new Error("Email already used");
       }
       // Create new user payload
       const newUser = {
@@ -26,7 +26,6 @@ class UserController {
       await req.db.collection("users").insertOne(newUser);
       res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
-      console.log(error, "UserController - registerUser");
       next(error);
     }
   }
@@ -35,18 +34,18 @@ class UserController {
     try {
       const { email, password } = req.body;
       if (!email) {
-        throw { message: "Email is required" };
+        throw new Error("Email is required");
       }
       if (!password) {
-        throw { message: "Password is required" };
+        throw new Error("Password is required");
       }
       const foundUser = await req.db.collection("users").findOne({ email });
       if (!foundUser) {
-        throw { message: "Invalid Email/Password" };
+        throw new Error("Invalid Email/Password");
       }
       const isPasswordValid = comparePassword(password, foundUser.password);
       if (!isPasswordValid) {
-        throw { message: "Invalid Email/Password" };
+        throw new Error("Invalid Email/Password");
       }
       const access_token = signToken({
         _id: foundUser._id,
@@ -54,7 +53,18 @@ class UserController {
       });
       res.status(200).json({ access_token: access_token });
     } catch (error) {
-      console.log(error, "UserController - loginUser");
+      next(error);
+    }
+  }
+
+  static async getAllUser(req, res, next) {
+    try {
+      const allUser = await req.db
+        .collection("users")
+        .find({}, { projection: { password: 0 } })
+        .toArray();
+      res.status(200).json({ users: allUser });
+    } catch (error) {
       next(error);
     }
   }
@@ -70,25 +80,16 @@ class UserController {
 
   static async deleteUser(req, res, next) {
     try {
-      const { email } = req.body;
-      if (!email) {
-        throw {
-          message: "Email is required",
-        };
-      }
-      // Check existing user inside database
-      const existingUser = await req.db.collection("users").findOne({ email });
+      const { _id } = req.user;
+      const existingUser = await req.db.collection("users").findOne({ _id });
       if (!existingUser) {
-        throw {
-          message: "User not found",
-        };
+        throw new Error("User not found");
       }
-      await req.db.collection("users").deleteOne({ email });
+      await req.db.collection("users").deleteOne({ _id });
       res.status(200).json({
         message: "User deleted successfully",
       });
     } catch (error) {
-      console.log(error, "UserController - deleteUser");
       next(error);
     }
   }
@@ -99,7 +100,6 @@ class UserController {
         message: "Connected to localhost:3000",
       });
     } catch (error) {
-      console.log(error, "UserController  - test");
       next(error);
     }
   }
