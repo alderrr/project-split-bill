@@ -57,7 +57,8 @@ class UserController {
     }
   }
 
-  static async getAllUser(req, res, next) {
+  // Temporary (Superuser command)
+  static async getUsers(req, res, next) {
     try {
       const allUser = await req.db
         .collection("users")
@@ -94,6 +95,7 @@ class UserController {
     }
   }
 
+  // Temporary (TESTING)
   static async test(req, res, next) {
     try {
       res.status(200).json({
