@@ -32,7 +32,7 @@ class BillController {
         }
       }
       const newBill = {
-        billOwnerId: _id,
+        billUserId: _id,
         billName: finalBillName,
         eventName: null,
         eventDate: null,
@@ -59,7 +59,7 @@ class BillController {
       const { _id } = req.user;
       const bills = await req.db
         .collection("bills")
-        .find({ billOwnerId: _id })
+        .find({ billUserId: _id })
         .toArray();
       res.status(200).json({ bills: bills });
     } catch (error) {
@@ -72,7 +72,7 @@ class BillController {
       const { _id } = req.user;
       const bill = await req.db
         .collection("bills")
-        .findOne({ _id: new ObjectId(billId), billOwnerId: _id });
+        .findOne({ _id: new ObjectId(billId), billUserId: _id });
       if (!bill) {
         throw new Error("Bill not found");
       }
@@ -93,13 +93,13 @@ class BillController {
       const { _id } = req.user;
       const bill = await req.db
         .collection("bills")
-        .findOne({ _id: new ObjectId(billId), billOwnerId: _id });
+        .findOne({ _id: new ObjectId(billId), billUserId: _id });
       if (!bill) {
         throw new Error("Bill not found");
       }
       await req.db
         .collection("bills")
-        .deleteOne({ _id: new ObjectId(billId), billOwnerId: _id });
+        .deleteOne({ _id: new ObjectId(billId), billUserId: _id });
       res.status(200).json({
         message: `Bill ${billId} deleted successfully`,
       });
