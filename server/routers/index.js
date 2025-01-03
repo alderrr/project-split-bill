@@ -17,6 +17,6 @@ router.post("/bill/add", BillController.addBill);
 router.get("/bill/all", BillController.getAllBill);
 router.get("/bill/:id", BillController.getOneBill);
 router.post("/bill/:id/edit", BillController.editBill);
-router.post("/bill/:id/delete", BillController.deleteBill);
+router.get("/bill/:id/delete", BillController.deleteBill);
 
 module.exports = router;

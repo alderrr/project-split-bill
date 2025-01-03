@@ -88,7 +88,7 @@ class UserController {
       }
       await req.db.collection("users").deleteOne({ _id });
       res.status(200).json({
-        message: "User deleted successfully",
+        message: `User ${_id} deleted successfully`,
       });
     } catch (error) {
       next(error);

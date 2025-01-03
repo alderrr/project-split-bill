@@ -3,7 +3,7 @@ const errorHandler = (err, req, res, next) => {
   let status = 500;
   let message = "Internal Server Error";
 
-  console.log(err);
+  console.log(err.message);
 
   // Error
   if (err.name === "Error") {
@@ -48,6 +48,16 @@ const errorHandler = (err, req, res, next) => {
       status = 401;
       message = "Invalid token";
     }
+  }
+
+  // BSONError
+  if (err.name === "BSONError") {
+    if (
+      err.message ===
+      "input must be a 24 character hex string, 12 byte Uint8Array, or an integer"
+    )
+      status = 400;
+    message = "Invalid ID";
   }
 
   // Response

@@ -89,6 +89,20 @@ class BillController {
   }
   static async deleteBill(req, res, next) {
     try {
+      const billId = req.params.id;
+      const { _id } = req.user;
+      const bill = await req.db
+        .collection("bills")
+        .findOne({ _id: new ObjectId(billId), billOwnerId: _id });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
+      await req.db
+        .collection("bills")
+        .deleteOne({ _id: new ObjectId(billId), billOwnerId: _id });
+      res.status(200).json({
+        message: `Bill ${billId} deleted successfully`,
+      });
     } catch (error) {
       next(error);
     }
