@@ -36,7 +36,7 @@ class BillController {
         billName: finalBillName,
         eventName: null,
         eventDate: null,
-        splitee: [],
+        splittee: [],
         items: [],
         tax: null,
         service: null,
@@ -83,6 +83,15 @@ class BillController {
   }
   static async editBill(req, res, next) {
     try {
+      const billId = req.params.id;
+      const { _id } = req.user;
+      const bill = await req.db
+        .collection("bills")
+        .findOne({ _id: new ObjectId(billId), billUserId: _id });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
+      // ADD LATER
     } catch (error) {
       next(error);
     }

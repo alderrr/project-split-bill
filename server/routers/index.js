@@ -19,9 +19,11 @@ router.get("/bill/all", BillController.getAllBill);
 router.get("/bill/:id", BillController.getOneBill);
 
 router.get("/bill/:id/splittee/add", SplitteeController.addSplittee);
-router.get("/bill/:id/splittee/:sid", SplitteeController.getSplittee);
-router.get("/bill/:id/splittee/:sid/edit", SplitteeController.editSplittee);
-router.get("/bill/:id/splittee/:sid/delete", SplitteeController.deleteSplittee);
+router.get("/bill/:id/splittee/all", SplitteeController.getAllSplittee);
+router.get("/bill/:id/splittee/:sid", SplitteeController.getOneSplittee);
+// router.get("/bill/:id/splittee/:sid", SplitteeController.getSplittee);
+// router.get("/bill/:id/splittee/:sid/edit", SplitteeController.editSplittee);
+// router.get("/bill/:id/splittee/:sid/delete", SplitteeController.deleteSplittee);
 
 router.post("/bill/:id/edit", BillController.editBill);
 router.get("/bill/:id/delete", BillController.deleteBill);

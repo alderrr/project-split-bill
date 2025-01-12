@@ -40,6 +40,10 @@ const errorHandler = (err, req, res, next) => {
       status = 404;
       message = "Bill not found";
     }
+    if (err.message === "Splittee not found") {
+      status = 404;
+      message = "Splittee not found";
+    }
   }
 
   // JsonWebTokenError

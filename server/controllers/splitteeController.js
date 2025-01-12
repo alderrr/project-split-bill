@@ -5,63 +5,86 @@ class SplitteeController {
     try {
       const billId = req.params.id;
       const { _id } = req.user;
+      const bill = await req.db
+        .collection("bills")
+        .findOne({ _id: new ObjectId(billId), billUserId: _id });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
       let finalSplitteeName = "";
       let maxSplitteeNumber = 0;
-      const splittees = await req.db.collection("splittees").find().toArray();
-      for (const splittee of splittees) {
-        const splitteeName = splittee.splitteeName;
-        if (splitteeName.startsWith("Splittee ")) {
-          const splitteeNumber = parseInt(splitteeName.split(" ")[1], 10); // Explicitly specify base-10
-          if (!isNaN(splitteeNumber)) {
-            maxSplitteeNumber = Math.max(maxSplitteeNumber, splitteeNumber);
+      if (bill.splittee && bill.splittee.length > 0) {
+        for (const splittee of bill.splittee) {
+          const splitteeName = splittee.splitteeName;
+          if (splitteeName.startsWith("Splittee ")) {
+            const splitteeNumber = parseInt(splitteeName.split(" ")[1], 10); // Explicitly specify base-10
+            if (!isNaN(splitteeNumber)) {
+              maxSplitteeNumber = Math.max(maxSplitteeNumber, splitteeNumber);
+            }
           }
         }
       }
       finalSplitteeName = `Splittee ${maxSplitteeNumber + 1}`;
       const newSplittee = {
-        splitteeBillId: new ObjectId(billId),
-        splitteeUserId: _id,
+        splitteeId: new ObjectId(),
         splitteeName: finalSplitteeName,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        splitteeItems: [],
       };
-      const createdSplittee = await req.db
-        .collection("splittees")
-        .insertOne(newSplittee);
+      const createdSplittee = await req.db.collection("bills").updateOne(
+        { _id: new ObjectId(billId) },
+        {
+          $push: { splittee: newSplittee },
+          $set: { createdAt: new Date(), updatedAt: new Date() },
+        }
+      );
+      if (createdSplittee.modifiedCount === 0) {
+        throw new Error("Failed to add Splittee to Bill");
+      }
       res.status(201).json({
-        message: "Splittee created successfully",
-        splitteeId: createdSplittee.insertedId,
-        splitteeName: finalSplitteeName,
+        message: "Splittee added successfully",
+        splittee: newSplittee,
       });
     } catch (error) {
       next(error);
     }
   }
 
-  static async getSplittee(req, res, next) {
+  static async getAllSplittee(req, res, next) {
     try {
+      const billId = req.params.id;
+      const { _id } = req.user;
+      const bill = await req.db.collection("bills").findOne({
+        _id: new ObjectId(billId),
+        billUserId: _id,
+      });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
+      const splittees = bill.splittee;
+      res.status(200).json({ splittees });
     } catch (error) {
       next(error);
     }
   }
 
-  static async editSplittee(req, res, next) {
-    try {
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async deleteSplittee(req, res, next) {
+  static async getOneSplittee(req, res, next) {
     try {
       const splitteeId = req.params.sid;
       const billId = req.params.id;
       const { _id } = req.user;
-      const splittee = await req.db.collection("splittees").findOne({
-        _id: new ObjectId(splitteeId),
-        splitteeBillId: billId,
-        splitteeUserId: _id,
+      const bill = await req.db
+        .collection("bills")
+        .findOne({ _id: new ObjectId(billId), billUserId: _id });
+      if (!bill) {
+        throw new Error("Bill not found");
+      }
+      const splittee = bill.splittee.find((splittee) => {
+        return splittee.splitteeId.toString() == splitteeId;
       });
+      if (!splittee) {
+        throw new Error("Splittee not found");
+      }
+      res.status(200).json({ splittee });
     } catch (error) {
       next(error);
     }
